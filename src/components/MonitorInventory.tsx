@@ -26,7 +26,7 @@ export const MonitorInventory: React.FC<MonitorInventoryProps> = ({ products, se
           </tr>
         </thead>
         <tbody>
-          {products.length && products.map((p, i) => (
+          {products.map((p, i) => (
             <tr key={i}>
               <td>{p.productNumber}</td>
               <td>{p.brand}</td>

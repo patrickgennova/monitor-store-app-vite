@@ -17,34 +17,48 @@ export type MonitorType = {
   productNumber: string
   brand: BrandNameType
   screenSize: ScreenSizeType
-  price: number
-  quantity: number
+  price: string
+  quantity: string
 }
 
 export const MonitorStore: React.FC<MonitorStoreProps> = ({ storeName }) => {
   const [products, setProducts] = useState<MonitorType[]>([]);
 
-  const addItem = (newItem: MonitorType) => {
-    setProducts(prev => [...prev, newItem])
+  const addItem = async (newItem: MonitorType) => {
+    return new Promise((resolve, reject) => {
+
+      let productNumberExist: boolean | undefined;
+
+      products.filter(e => {
+        if (e.productNumber === newItem.productNumber) return productNumberExist = true
+      })
+
+      if (productNumberExist) return reject("Já existe um produto com esse número.")
+
+      setProducts(prev => [...prev, newItem])
+
+      resolve("OK")
+    })
   }
 
   const sellItem = (index: number) => {
-    let product = products
+    if (Number(products[index].quantity) <= 0) return alert('Sem estoque')
 
-    if (Number(product[index].quantity) === 0) return alert('Sem estoque')
+    let changeQuantityOfProduct = products[index];
+    changeQuantityOfProduct.quantity = String(Number(changeQuantityOfProduct.quantity) - 1)
 
-    product[index] = { ...product[index], quantity: Number(product[index].quantity) - 1 }
-
-    setProducts(product)
+    setProducts(prev => {
+      prev[index] = changeQuantityOfProduct
+      return [...prev]
+    })
   }
-  console.log(products)
 
 
   return (
     <>
       <h1>{storeName}</h1>
 
-      <NewMonitorForm addItem={addItem} products={products} />
+      <NewMonitorForm addItem={addItem} />
       <MonitorFilters />
       <MonitorInventory products={products} sellItem={sellItem} />
     </>

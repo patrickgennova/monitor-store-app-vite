@@ -1,48 +1,42 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BRAND_NAMES, SCREEN_SIZES, MonitorType } from './MonitorStore'
 
 type NewMonitorFormProps = {
-  addItem: Function,
-  products: MonitorType[]
+  addItem: Function
 }
 
-export const NewMonitorForm: React.FC<NewMonitorFormProps> = ({ addItem, products }) => {
+export const NewMonitorForm: React.FC<NewMonitorFormProps> = ({ addItem }) => {
 
-  const [productNumber, setProductNumber] = useState("")
-  const [brand, setBrand] = useState("")
-  const [screenSize, setScreenSize] = useState("")
-  const [price, setPrice] = useState("")
-  const [quantity, setQuantity] = useState("")
+  const [newItem, setNewItem] = useState<MonitorType>({
+    productNumber: "",
+    brand: "",
+    screenSize: "",
+    price: "",
+    quantity: ""
+  })
+  const [isFilled, setIsFilled] = useState(true)
 
-  const mountItem = () => {
-
-    if (!productNumber || !brand || !screenSize || !price || !quantity) {
-      return alert('Preencha todos os campos')
+  useEffect(() => {
+    if (newItem && newItem.productNumber && newItem.brand && newItem.screenSize && newItem.price && newItem.quantity) {
+      setIsFilled(false)
     }
+  }, [newItem])
 
-    let productNumberExist: boolean | undefined;
+  const handleItem = (prop: string, value: string) => {
+    setNewItem({ ...newItem, [prop]: value })
+  }
 
-    products.filter(e => {
-      if (e.productNumber === productNumber) return productNumberExist = true
-    })
-
-    if (productNumberExist) return alert("Já existe um produto com esse número.")
-
-    let newProduct = {
-      productNumber,
-      brand,
-      screenSize,
-      price,
-      quantity
-    }
-    addItem(newProduct)
-
-    setProductNumber('')
-    setBrand('')
-    setScreenSize('')
-    setPrice('')
-    setQuantity('')
-
+  const submitNewItem = () => {
+    addItem(newItem)
+      .then(() =>
+        setNewItem({
+          productNumber: "",
+          brand: "",
+          screenSize: "",
+          price: "",
+          quantity: ""
+        }))
+      .catch((err: string) => alert(err))
   }
 
   return (
@@ -53,20 +47,20 @@ export const NewMonitorForm: React.FC<NewMonitorFormProps> = ({ addItem, product
       <input
         type='text'
         name='productNumber'
-        value={productNumber}
-        onChange={e => setProductNumber(e.target.value)}
+        value={newItem.productNumber}
+        onChange={e => handleItem("productNumber", e.target.value)}
       />
       <br />
 
       <label htmlFor='brand'>Brand: </label>
-      <select name='brand' value={brand} onChange={e => setBrand(e.target.value)}>
+      <select name='brand' value={newItem.brand} onChange={e => handleItem("brand", e.target.value)}>
         <option value="" disabled>-- Select --</option>
         {BRAND_NAMES.map(b => <option key={b} value={b}>{b}</option>)}
       </select>
       <br />
 
       <label htmlFor='screenSize'>Screen Size: </label>
-      <select name='screenSize' value={screenSize} onChange={e => setScreenSize(e.target.value)}>
+      <select name='screenSize' value={newItem.screenSize} onChange={e => handleItem('screenSize', e.target.value)}>
         <option value="" disabled>-- Select --</option>
         {SCREEN_SIZES.map(s => <option key={s} value={s}>{s}</option>)}
       </select>
@@ -74,17 +68,17 @@ export const NewMonitorForm: React.FC<NewMonitorFormProps> = ({ addItem, product
 
       <label htmlFor='price'>Price: </label>
       <input type='number' name='price'
-        value={price}
-        onChange={e => setPrice(e.target.value)} />
+        value={newItem.price}
+        onChange={e => handleItem('price', e.target.value)} />
       <br />
 
       <label htmlFor='quantity'>Quantity: </label>
       <input type='number' name='quantity'
-        value={quantity}
-        onChange={e => setQuantity(e.target.value)} />
+        value={newItem.quantity}
+        onChange={e => handleItem('quantity', e.target.value)} />
       <br />
 
-      <input type='button' value='Add Monitor' onClick={() => mountItem()} />
+      <input type='button' value='Add Monitor' disabled={isFilled} onClick={() => submitNewItem()} />
     </fieldset>
   )
 }
